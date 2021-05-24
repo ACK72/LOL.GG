@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			.switch { position: relative; display: inline-block; width: 30px; height: 17px; }
+			.switch input { opacity: 0; width: 0; height: 0; }
+			.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+			.slider:before { position: absolute; content: ""; height: 13px; width: 13px; left: 2px; bottom: 2px; background-color: white; transition: .4s; }
+			.slider.round { border-radius: 17px; }
+			.slider.round:before { border-radius: 50%; }
+			.setting { display: grid; grid-template-columns: 117px 1fr; row-gap: 2px; }
+			.sel { width: 100px; }
+			.error { color: red; text-align: center; }
+			.summoner { margin-bottom: 6px; display: grid; grid-template-columns: 55px 1fr; }
+			#tnrdiv { margin-top: 2px; display: grid; grid-template-columns: 50px 100px; row-gap: 2px; }
+			#override { color: red; margin-top: 6px; margin-bottom: 6px; }
+			#update { margin-top: 6px; margin-bottom: 6px; text-align: center; }
+			#forceupdate { margin-bottom: 6px; text-align: center; }
+			#stats { cursor: pointer; margin-top: 6px; }
+			#stats:hover { color: #555; text-decoration: underline; }
+			#path { width: 146px; margin-right: 4px; }
+			#pathsave { margin-top: 2px; }
+			input:checked + .slider { background-color: #2196F3; }
+			input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
+			input:checked + .slider:before { transform: translateX(13px); }
+			body { width: 150px; }
+		</style>
+	</head>
+	<body>
+		<div id="summoner" class="summoner">
+			<div id="icon">
+				<img src="https://ddragon.leagueoflegends.com/cdn/11.1.1/img/profileicon/29.png" width="50" height="50">
+			</div>
+			<div>
+				<div id="profile" style="text-align: center">UNKNOWN</div>
+				<div id="stats" style="text-align: center"></div>
+			</div>
+		</div>
+		<div id="error" style="display: none">
+			<h3 class="error">ATTENTION</h3>
+			<p>In order to communicate with<br>League of Legends client, following configurations should be checked:</p>
+		</div>
+		<div id="sslerror" style="display: none">
+			<strong>1. <a href="#" id="sslerrorlink">CLICK HERE</a></strong> to download certificate<br>
+			<strong>And add it to "Trusted Root CA".</strong>
+		</div>
+		<div id="fileerror" style="display: none">
+			<p>
+				<strong>2. <a href="#" id="fileerrorlink">CLICK HERE</a></strong> and enable<br>
+				<strong>Allow access to file URLs</strong>
+			</p>
+			<p>
+				<strong>3. Check League of Legends Path:</strong>
+				<input id="path" value=""><button id="pathsave">Save</button>
+			</p>
+		</div>
+		<div class="setting">
+			<div id="multi" style="display: none">Search Team stats</div>
+			<div id="multidiv" style="display: none">
+				<label class="switch" style="float: right;">
+					<input id="multicheckbox" type="checkbox" checked>
+					<span class="slider round"></span>
+				</label>
+			</div>
+			<div id="flash" style="display: none">Set flash on F key</div>
+			<div id="flashdiv" style="display: none">
+				<label class="switch" style="float: right;">
+					<input id="flashcheckbox" type="checkbox" checked>
+					<span class="slider round"></span>
+				</label>
+			</div>
+			<div id="smite" style="display: none">Set smite on G key</div>
+			<div id="smitediv" style="display: none">
+				<label class="switch" style="float: right;">
+					<input id="smitecheckbox" type="checkbox" checked>
+					<span class="slider round"></span>
+				</label>
+			</div>
+			<div id="ctnr" style="display: none">Custom Tier&Region</div>
+			<div id="ctnrdiv" style="display: none">
+				<label class="switch" style="float: right;">
+					<input id="ctnrcheckbox" type="checkbox" checked>
+					<span class="slider round"></span>
+				</label>
+			</div>
+			<div id="disabled">Extension Enabled</div>
+			<div>
+				<label class="switch" style="float: right;">
+					<input id="disabledcheckbox" type="checkbox" checked>
+					<span class="slider round"></span>
+				</label>
+			</div>
+		</div>
+		<div id="tnrdiv" style="display: none">
+			<div>Tier</div>
+			<div>
+				<select id="tier" class="sel">
+					<option value="all">ALL RANKS</option>
+					<option value="1trick">1TRICK</option>
+					<option value="challenger">CHALLENGER</option>
+					<option value="grandmaster">G.MASTER</option>
+					<option value="master_plus">MASTER+</option>
+					<option value="master">MASTER</option>
+					<option value="d2_plus">DIAMOND2+</option>
+					<option value="diamond_plus">DIAMOND+</option>
+					<option value="diamond">DIAMOND</option>
+					<option value="">PLATINUM+</option>
+					<option value="platinum">PLATINUM</option>
+					<option value="gold_plus">GOLD+</option>
+					<option value="gold">GOLD</option>
+					<option value="silver">SILVER</option>
+					<option value="bronze">BRONZE</option>
+					<option value="iron">IRON</option>
+					<option value="unranked">UNRANKED</option>
+				</select>
+			</div>
+			<div>Region</div>
+			<div>
+				<select id="region" class="sel">
+					<option value="" selected="selected">GLOBAL</option>
+					<option value="kr">KR</option>
+					<option value="na">NA</option>
+					<option value="euw">EUW</option>
+				</select>
+			</div>
+		</div>
+		<div id="override" style="display: none">*Smite will override Flash</div>
+		<div id="update" style="display: none">
+			<a href="#" id="request">UPDATE</a>
+		</div>
+	</body>
+	<script src="extension.js"></script>
+</html>

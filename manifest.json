@@ -1,0 +1,41 @@
+{
+	"name": "LoL.GG",
+	"version": "1.21.5.0",
+	"description": "LoL.GG based on LoLalytics & OP.GG",
+	"permissions": [
+		"activeTab",
+		"storage",
+		"tabs",
+		"https://127.0.0.1/*",
+		"file://*"
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"browser_action": {
+		"default_popup": "extension.html",
+		"default_icon": {
+			"16": "images/LoL16.png",
+			"48": "images/LoL48.png",
+			"128": "images/LoL128.png"
+		}
+	},
+	"icons": {
+		"16": "images/LoL16.png",
+		"48": "images/LoL48.png",
+		"128": "images/LoL128.png"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"https://lolalytics.com/*"
+			],
+			"js": [
+				"lolalytics.js"
+			]
+		}
+	],
+	"manifest_version": 2
+}
