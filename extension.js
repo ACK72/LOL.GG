@@ -10,8 +10,8 @@ document.getElementById('region').addEventListener('change', (event) => {
 }, false)
 
 multicheckbox.onclick = (element) => {
-	chrome.runtime.sendMessage({ query: 'multiflash' }, (data) => {
-		document.getElementById('flashcheckbox').checked = data
+	chrome.runtime.sendMessage({ query: 'togglemulti' }, (data) => {
+		document.getElementById('multicheckbox').checked = data
 	})
 }
 flashcheckbox.onclick = (element) => {
@@ -94,7 +94,7 @@ chrome.runtime.sendMessage({ query: 'summoner' }, data => {
 })
 
 chrome.runtime.sendMessage({ query: 'multi' }, (data) => {
-	document.getElementById('flashcheckbox').checked = data
+	document.getElementById('multicheckbox').checked = data
 })
 chrome.runtime.sendMessage({ query: 'flash' }, (data) => {
 	document.getElementById('flash').innerHTML = 'Set Flash on ' + (data[0] ? 'F key' : 'D key')

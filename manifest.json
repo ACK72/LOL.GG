@@ -1,6 +1,6 @@
 {
 	"name": "LoL.GG",
-	"version": "1.21.6.0",
+	"version": "1.21.6.1",
 	"description": "LoL.GG based on LoLalytics & OP.GG",
 	"permissions": [
 		"activeTab",

@@ -181,7 +181,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.query === 'togglemulti') {
 		multi = !multi
 		chrome.storage.local.set({ multi: multi })
-		sendResponse()
+		sendResponse(multi)
 		return true
 	}
 	if (request.query === 'toggleflash') {
