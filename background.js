@@ -11,26 +11,26 @@ let disabled = false
 let client = { live: false, summoner: false, lolalytics: 0, opgg: 0 }
 
 let regionMap = {
-    'KR': 'www',
-    'JP': 'jp',
-    'NA': 'na',
-    'EUW': 'euw',
-    'EUNE': 'eune',
-    'OCE': 'oce',
-    'BR': 'br',
-    'LAS': 'las',
-    'LAN': 'lan',
-    'RU': 'ru',
-    'TR': 'tr',
-    'SG': 'sg',
-    'ID': 'id',
-    'PH': 'ph',
-    'TW': 'tw',
-    'VN': 'vn',
-    'TH': 'th',
-    'LA1': 'lan',
-    'LA2': 'las',
-    'OC1': 'oce'
+	'KR': 'www',
+	'JP': 'jp',
+	'NA': 'na',
+	'EUW': 'euw',
+	'EUNE': 'eune',
+	'OCE': 'oce',
+	'BR': 'br',
+	'LAS': 'las',
+	'LAN': 'lan',
+	'RU': 'ru',
+	'TR': 'tr',
+	'SG': 'sg',
+	'ID': 'id',
+	'PH': 'ph',
+	'TW': 'tw',
+	'VN': 'vn',
+	'TH': 'th',
+	'LA1': 'lan',
+	'LA2': 'las',
+	'OC1': 'oce'
 }
 
 chrome.runtime.onInstalled.addListener(() => { chrome.storage.local.set({ multi: multi, flash: flash, smite: smite, tnr: tnr, tier: tier, region: region, disabled: disabled }) })
@@ -55,12 +55,12 @@ chrome.runtime.getPlatformInfo((info) => {
 const resetClient = () => { client = { live: false, summoner: false, lolalytics: 0, opgg: 0 } }
 
 const requestURL = (url, riot=false, method='GET', data={}) => {
-    const xhr = new XMLHttpRequest()
+	const xhr = new XMLHttpRequest()
 	return new Promise(function (resolve, reject) {
 		xhr.onreadystatechange = function () {
 			if (xhr.readyState !== 4) return
 			if (xhr.response.length > 0) resolve(xhr.response)
-            else reject(JSON.stringify({ status: xhr.status, statusText: xhr.statusText }))
+			else reject(JSON.stringify({ status: xhr.status, statusText: xhr.statusText }))
 		}
 		if (riot) xhr.open(method, 'https://riot:'+client.password+'@127.0.0.1:'+client.port+url, true)
 		else xhr.open(method, url, true)
@@ -71,20 +71,20 @@ const requestURL = (url, riot=false, method='GET', data={}) => {
 }
 
 const fetchURL = (url, key=false, method='GET', data={}) => {
-    requestURL(url, true, method, data)
+	requestURL(url, true, method, data)
 	.then((response) => {
-        client.success = true
-        if (key) {
-            let json = JSON.parse(response)
-            if (typeof json.errorCode === 'undefined') client[key] = json
-            else client[key] = false
-        }
+		client.success = true
+		if (key) {
+			let json = JSON.parse(response)
+			if (typeof json.errorCode === 'undefined') client[key] = json
+			else client[key] = false
+		}
 	})
 	.catch((error) => {
-        client.success = false
+		client.success = false
 		client[key] = false
-        if (key === 'locale' && client.live && error.includes('"status":0')) client.error = true
-    })
+		if (key === 'locale' && client.live && error.includes('"status":0')) client.error = true
+	})
 }
 
 const readLockFile = () => {
@@ -242,7 +242,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 const onSession = () => {
 	if (!client.summoner) return
 
-    fetchURL('/lol-champ-select/v1/session', 'session')
+	fetchURL('/lol-champ-select/v1/session', 'session')
 	if (!client.session) {
 		client.playerstatus = undefined
 		client.pid = undefined
@@ -573,7 +573,11 @@ setInterval(() => {
 			let champ = JSON.parse(response).data
 			client.pool = {}
 			
-			for (let x in champ) { client.pool[champ[x].key] = [ champ[x].id.toLowerCase(), champ[x].name ] }
+			for (let x in champ) {
+				let champId = champ[x].id.toLowerCase()
+				if (champId === 'monkeyking') champId = 'wukong'
+				client.pool[champ[x].key] = [ champId, champ[x].name ]
+			}
 		})
 		.catch((error) => {})
 		return
