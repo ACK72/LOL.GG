@@ -2,11 +2,11 @@
 
 document.getElementById('tier').addEventListener('change', (event) => {
 	let tier = document.getElementById('tier')
-	chrome.runtime.sendMessage({ query: 'tier', value: [tier.selectedIndex, tier.value] }, (data) => {})
+	chrome.runtime.sendMessage({ query: 'settier', value: [tier.selectedIndex, tier.value] }, (data) => {})
 }, false)
 document.getElementById('region').addEventListener('change', (event) => {
 	let region = document.getElementById('region')
-	chrome.runtime.sendMessage({ query: 'region', value: [region.selectedIndex, region.value] }, (data) => {})
+	chrome.runtime.sendMessage({ query: 'setregion', value: [region.selectedIndex, region.value] }, (data) => {})
 }, false)
 
 multicheckbox.onclick = (element) => {
@@ -49,8 +49,8 @@ disabledcheckbox.onclick = (element) => {
 
 chrome.runtime.sendMessage({ query: 'summoner' }, data => {
 	document.body.style.width = '150px'
+	if (data.disabled) return
 	if (data.error) {
-		if (data.disabled) return
 		document.body.style.width = '205px'
 		document.getElementById('summoner').style.display = 'none'
 		document.getElementById('error').style.display = 'block'
@@ -93,28 +93,28 @@ chrome.runtime.sendMessage({ query: 'summoner' }, data => {
 	}
 })
 
-chrome.runtime.sendMessage({ query: 'multi' }, (data) => {
+chrome.runtime.sendMessage({ query: 'getmulti' }, (data) => {
 	document.getElementById('multicheckbox').checked = data
 })
-chrome.runtime.sendMessage({ query: 'flash' }, (data) => {
+chrome.runtime.sendMessage({ query: 'getflash' }, (data) => {
 	document.getElementById('flash').innerHTML = 'Set Flash on ' + (data[0] ? 'F key' : 'D key')
 	document.getElementById('flashcheckbox').checked = data[0]
 	if (data[1]) document.getElementById('override').style.display = 'block'
 	else document.getElementById('override').style.display = 'none'
 })
-chrome.runtime.sendMessage({ query: 'smite' }, (data) => {
+chrome.runtime.sendMessage({ query: 'getsmite' }, (data) => {
 	document.getElementById('smite').innerHTML = 'Set Smite on ' + (data[0] ? 'F key' : 'D key')
 	document.getElementById('smitecheckbox').checked = data[0]
 	if (data[1]) document.getElementById('override').style.display = 'block'
 	else document.getElementById('override').style.display = 'none'
 })
-chrome.runtime.sendMessage({ query: 'ctnr' }, (data) => {
+chrome.runtime.sendMessage({ query: 'getctnr' }, (data) => {
 	document.getElementById('ctnr').innerHTML = data[0] ? 'Custom Tier&Region' : 'Use PLAT+&GLOBAL'
 	document.getElementById('ctnrcheckbox').checked = data[0]
 	document.getElementById('tier').selectedIndex = data[1]
 	document.getElementById('region').selectedIndex = data[2]
 })
-chrome.runtime.sendMessage({ query: 'disabled' }, (data) => {
+chrome.runtime.sendMessage({ query: 'getdisabled' }, (data) => {
 	document.getElementById('disabled').innerHTML = 'Extension ' + (data ? 'Disabled' : 'Enabled')
 	document.getElementById('disabledcheckbox').checked = !data
 })

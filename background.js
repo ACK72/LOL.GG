@@ -157,23 +157,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (region === undefined) region  = [0, '']
 	if (disabled === undefined) disabled = false
 
-	if (request.query === 'multi') {
+	if (request.query === 'getmulti') {
 		sendResponse(multi)
 		return true
 	}
-	if (request.query === 'flash') {
+	if (request.query === 'getflash') {
 		sendResponse([flash, flash === smite])
 		return true
 	}
-	if (request.query === 'smite') {
+	if (request.query === 'getsmite') {
 		sendResponse([smite, flash === smite])
 		return true
 	}
-	if (request.query === 'ctnr') {
+	if (request.query === 'getctnr') {
 		sendResponse([tnr, tier[0], region[0]])
 		return true
 	}
-	if (request.query === 'disabled') {
+	if (request.query === 'getdisabled') {
 		sendResponse(disabled)
 		return true
 	}
@@ -214,7 +214,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		return true
 	}
 
-	if (request.query === 'tier') {
+	if (request.query === 'settier') {
 		tier = request.value
 		client.queueId = undefined
 		client.tierlist = undefined
@@ -222,7 +222,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		chrome.storage.local.set({ tier: tier })
 		return true
 	}
-	if (request.query === 'region') {
+	if (request.query === 'setregion') {
 		region = request.value
 		client.queueId = undefined
 		client.tierlist = undefined
@@ -245,10 +245,11 @@ const onSession = () => {
 	fetchURL('/lol-champ-select/v1/session', 'session')
 	if (!client.session) {
 		client.playerstatus = undefined
+		client.cid = undefined
 		client.pid = undefined
 		client.queueId = undefined
-		client.assigned = false
-		client.tierlist = false
+		client.assigned = true
+		client.newpick = true
 		client.update = 1
 
 		if (multi) {
@@ -275,11 +276,6 @@ const onSession = () => {
 		client.query = ''
 		// https://static.developer.riotgames.com/docs/lol/queues.json
 		switch (client.queueId) {
-			/*
-			case 0:
-				// Set queue by map
-				break
-			*/
 			case 100:
 			case 450:
 				client.tierlist = true
@@ -312,61 +308,57 @@ const onSession = () => {
 		client.query += region[1].length === 0 ? region[1] : client.query.length === 0 ? '?region='+region[1] : '&region='+region[1]
 	}
 	
-	let turl = 'https://lolalytics.com/lol/tierlist/'+client.queue+client.query
-	if (!client.assigned) {
-		client.assigned = true
-		chrome.tabs.get(client.lolalytics, (tab) => {
-			if (tab === undefined || !tab.url.includes('lolalytics.com')) {
-				chrome.tabs.create({ url: turl }, async (tab) => {
-					chrome.tabs.onUpdated.addListener(function ulistener (id, info) {
-						if (info.status === 'complete' && id === tab.id) {
-							chrome.tabs.onUpdated.removeListener(ulistener)
-							client.lolalytics = tab.id
-							client.cid = undefined
-							client.assigned = false
-							client.tierlist = true
-						}
-					})
-					chrome.tabs.onRemoved.addListener(function rlistener (id, info) {
-						if (id === tab.id) {
-							chrome.tabs.onRemoved.removeListener(rlistener)
-							client.cid = undefined
-							client.assigned = false
-						}
-					})
-				})
-			} else if (!client.tierlist) {
-				chrome.tabs.update(client.lolalytics, { url: turl, active: true, highlighted: true }, async (tab) => {
-					// Add onUpdate listener only, as onRemoved listener already set.
-					chrome.tabs.onUpdated.addListener(function ulistener (id, info) {
-						if (info.status === 'complete' && id === tab.id) {
-							chrome.tabs.onUpdated.removeListener(ulistener)
-							client.lolalytics = tab.id
-							client.cid = undefined
-							client.assigned = false
-							client.tierlist = true
-						}
-					})
-				})
-			} else client.assigned = false
-		})
-	}
+	if (client.assigned) {
+		client.assigned = false
 
-	const cid = client.session.myTeam[client.pid].championId > 0 ? client.session.myTeam[client.pid].championId : client.session.myTeam[client.pid].championPickIntent
-	if (cid && client.cid !== cid) {
+		let cid = client.session.myTeam[client.pid].championId > 0 ? client.session.myTeam[client.pid].championId : client.session.myTeam[client.pid].championPickIntent
+
+		client.newpick = (client.newpick && client.cid === undefined) || client.cid !== cid
 		client.cid = cid
-		client.tierlist = true
-		client.page = 'LoLalytics - ' + client.pool[client.cid][1] + client.suffix
+		if (client.cid) client.page = 'LoLalytics - ' + client.pool[client.cid][1] + client.suffix
 
-		let curl = 'https://lolalytics.com/lol/'+client.pool[client.cid][0]+'/'+client.queue+'build/'+client.query
-		chrome.tabs.update(client.lolalytics, { url: curl, active: true, highlighted: true }, async (tab) => {
-			chrome.tabs.onUpdated.addListener(function ulistener (id, info) {
-				if (info.status === 'complete' && id === tab.id) {
-					chrome.tabs.onUpdated.removeListener(ulistener)
-					client.update = 0
+		let lurl = ''
+		if (client.cid === 0) lurl = 'https://lolalytics.com/lol/tierlist/'+client.queue+client.query
+		else lurl = 'https://lolalytics.com/lol/'+client.pool[client.cid][0]+'/'+client.queue+'build/'+client.query
+
+		if (client.newpick) {
+			chrome.tabs.get(client.lolalytics, (tab) => {
+				if (tab === undefined || !tab.url.includes('lolalytics.com')) {
+					chrome.tabs.create({ url: lurl }, async (tab) => {
+						chrome.tabs.onUpdated.addListener(function ulistener (id, info) {
+							if (info.status === 'complete' && id === tab.id) {
+								chrome.tabs.onUpdated.removeListener(ulistener)
+								if (client.cid) client.update = 0
+								client.lolalytics = tab.id
+								client.assigned = true
+								client.newpick = false
+							}
+						})
+						chrome.tabs.onRemoved.addListener(function rlistener (id, info) {
+							if (id === tab.id) {
+								chrome.tabs.onRemoved.removeListener(rlistener)
+								client.assigned = true
+								client.newpick = true
+							}
+						})
+					})
+				} else {
+					chrome.tabs.update(client.lolalytics, { url: lurl, active: true, highlighted: true }, async (tab) => {
+						chrome.tabs.onUpdated.addListener(function ulistener (id, info) {
+							if (info.status === 'complete' && id === tab.id) {
+								chrome.tabs.onUpdated.removeListener(ulistener)
+								if (client.cid) client.update = 0
+								client.lolalytics = tab.id
+								client.assigned = true
+								client.newpick = false
+							}
+						})
+					})
 				}
 			})
-		})
+		} else {
+			client.assigned = true
+		}
 	}
 
 	if (multi && client.newteam) {
@@ -424,7 +416,6 @@ const updatePage = (data, force=false) => {
 
 	// spell
 	// flash: 4 <<< smite: 11
-	// let sdata = { selectedSkinId: 0, spell1Id: 0, spell2Id: 0, wardSkinId: 0 }
 	let sdata = { spell1Id: 0, spell2Id: 0 }
 	if (data.spell[0] === 11 || data.spell[1] === 11) {
 		if (smite) {
@@ -501,7 +492,7 @@ const updatePage = (data, force=false) => {
 	.catch((error) => {})
 
 	// item
-	if (!data.parseItem) return // Ignore update
+	if (!data.parseItem) return
 	requestURL('/lol-item-sets/v1/item-sets/'+client.summoner.summonerId+'/sets', true)
 	.then((response) => {
 		let items = JSON.parse(response)
