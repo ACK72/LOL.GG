@@ -1,12 +1,14 @@
 {
 	"name": "LoL.GG",
-	"version": "1.21.7.0",
+	"version": "1.22.11.1",
 	"description": "",
 	"permissions": [
 		"contextMenus",
 		"storage",
 		"tabs",
+		"https://lolalytics.com/*",
 		"https://127.0.0.1/*",
+		"https://lol.ps/*",
 		"file://*"
 	],
 	"background": {
@@ -20,16 +22,6 @@
 		"48": "icon/LoLGG48.png",
 		"128": "icon/LoLGG128.png"
 	},
-	"content_scripts": [
-		{
-			"matches": [
-				"https://lolalytics.com/*",
-				"https://lol.ps/*"
-			],
-			"js": [
-				"lib/foreground.js"
-			]
-		}
-	],
+	"content_security_policy": "script-src 'self'; object-src 'self';",
 	"manifest_version": 2
 }
